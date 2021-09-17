@@ -18,8 +18,10 @@ int lastSignOfLife;
 String defaultPort = "/dev/ttyUSB1";
 int checkConnectionInterval = 1000;
 int lastMillis;
+boolean benderIsReady = false;
+
 boolean homed = false;
-int[] angleRangeBender = {-45, 45};
+int[] angleRangeBender = {-90, 90};
 int[] angleRangeZAxis = {-90, 90};
 Shape currentSelectedShape;
 
@@ -46,10 +48,11 @@ Button buttonBendDegrees;
 Slider sliderBendDegrees;
 Button btnLoadFile;
 Textlabel tlCurrentFile;
+Button btnSendToBender;
 
 void setup() 
 {
-  size(325, 390);
+  size(325, 420);
 
 
   cp5 = new ControlP5(this);
@@ -65,6 +68,10 @@ void setup()
   rowY += 15;
   btnLoadFile = newButton("load", xFirst, rowY, conH*2, conH/2);
   tlCurrentFile = cp5.addTextlabel("currentFile", "no file loaded", xScnd, rowY+4);
+
+  rowY += 20;
+  btnSendToBender = newButton("send to bender", xFirst, rowY, conH*2, conH/2)
+    .setColorBackground(color(145, 0, 0));
 
   // MANUAL CONTROLS
   rowY += conH + 5;
@@ -138,6 +145,26 @@ void draw() {
       connectionStatus = 5;
       statusLed.updateStatus(connectionStatus);
       statusField.setText("status: connection to bender lost!");
+    }
+  }
+}
+
+void sendInstructionsToBender() {
+  Processor processor = new Processor();
+  processor.setShape(currentSelectedShape);
+  processor.preprocessShape();
+  processor.calcCAM();
+  CAM cam = processor.getCam();
+  Instruction step;
+  while((step = cam.popStep()) != null) {
+    if (step instanceof FeedInstruction) {
+      float dist = step.getAttribute();
+      println("feeding:" + step.getAttribute());      
+      sendCommand(Order.FEEDER.getValue(), (int) dist);
+    } else if (step instanceof BendWireInstruction) {
+      float angle = step.getAttribute();
+      println("bending:" + step.getAttribute());      
+      sendCommand(Order.BEND.getValue(), (int) angle);
     }
   }
 }
@@ -280,6 +307,16 @@ void controlEvent(ControlEvent theEvent) {
   Controller con = theEvent.getController();
   if (con == btnLoadFile) {
     selectInput("Select .csv file:", "fileSelected");
+  } else if (con == btnSendToBender) {
+    if (currentSelectedShape != null) {
+      if (homed) {
+        sendInstructionsToBender();
+      } else {
+        println("home first");
+      }
+    } else {
+      println("no shape selected");
+    }
   } else if (con == moveBenderPlus) {
     sendCommand(Order.BENDER.getValue(), (int) benderRadius.getValue());
     if (homed) setHomed(false);
@@ -323,8 +360,8 @@ void sendCommand(int cmd) {
 }
 
 void sendCommand(int cmd, int value) {
-  if (!connectionIsLocked && connectionStatus == 3) {
-    //if (connectionStatus == 3) {
+  //if (!connectionIsLocked && connectionStatus == 3) {
+  if (connectionStatus == 3) {
     connectionIsLocked = true;
     //println("sending command: " + cmd + " with value: " + value);
     myPort.write(byte(cmd));

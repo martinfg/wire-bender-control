@@ -1,6 +1,6 @@
 public class CAM {
   private ArrayList<Instruction> steps;
-  //private int stepCount = 0;
+  private int stepCount = 0;
 
   public CAM() {
     this.steps = new ArrayList<Instruction>();
@@ -27,6 +27,17 @@ public class CAM {
     if (index < steps.size() && index >= 0) {
       return steps.get(index);
     } else {
+      return null;
+    }
+  }
+  
+  public Instruction popStep() {
+    if (stepCount < steps.size()) {
+      Instruction step = steps.get(stepCount);
+      stepCount ++;
+      return step;
+    } else {
+      stepCount = 0;
       return null;
     }
   }

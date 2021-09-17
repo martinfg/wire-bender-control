@@ -16,8 +16,9 @@ public enum Order {
     ISHOMED(21),
     DELHOMED(22),
     ERR_NOTHOMED(23),
-    BEND(25);
-    
+    BEND(25),
+    CMD_EXECUTED(29);
+
     private int value;
     private static Map map = new HashMap<Integer, String>();
     
