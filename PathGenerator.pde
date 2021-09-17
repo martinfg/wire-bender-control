@@ -83,6 +83,24 @@ public class PathGenerator {
       )));
   }
 
+  public ArrayList<PVector3> shapeFromCSV(Table table) {
+    try {
+      ArrayList<PVector3> points = new ArrayList<PVector3>();
+      for (TableRow row : table.rows()) {
+        float x = row.getInt("x");
+        float y = row.getInt("y");
+        float z = row.getInt("z");
+        points.add(new PVector3(x, y, z));
+      }
+      // println(points.size());
+      return points;
+    } 
+    catch (Exception e) {
+      println(e);
+      return null;
+    }
+  }
+
   public ArrayList<PVector3> getSimpleShape(int index) {
     return simpleShapes.get(index);
   }

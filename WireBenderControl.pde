@@ -21,6 +21,7 @@ int lastMillis;
 boolean homed = false;
 int[] angleRangeBender = {-45, 45};
 int[] angleRangeZAxis = {-90, 90};
+Shape currentSelectedShape;
 
 ControlP5 cp5;
 int conH = 35;
@@ -43,29 +44,14 @@ StatusLed statusLed;
 Button buttonSetHome; 
 Button buttonBendDegrees;
 Slider sliderBendDegrees;
-
-void fileSelected(File selection) {
-  if (selection == null) {
-    println("Window was closed or the user hit cancel.");
-  } else {
-    String filePath = selection.getAbsolutePath();
-    Table table = loadTable(filePath, "header");
-    for (TableRow row : table.rows()) {
-      float x = row.getInt("x");
-      float y = row.getInt("y");
-      float z = row.getInt("z");
-      PVector p = new PVector(x, y, z);
-      println(p);
-      // IllegalArgumentException
-    }
-  }
-}
+Button btnLoadFile;
+Textlabel tlCurrentFile;
 
 void setup() 
 {
-  size(325, 300);
-  selectInput("Select a file to process:", "fileSelected");
-  
+  size(325, 390);
+
+
   cp5 = new ControlP5(this);
   int xFirst = 20;
   int xScnd = xFirst + conH*2 + 5;
@@ -74,6 +60,16 @@ void setup()
 
   groupManController = cp5.addGroup("manController");
 
+  // LOAD AND RENDER
+  newHeader("LOAD FILE", xFirst, rowY);
+  rowY += 15;
+  btnLoadFile = newButton("load", xFirst, rowY, conH*2, conH/2);
+  tlCurrentFile = cp5.addTextlabel("currentFile", "no file loaded", xScnd, rowY+4);
+
+  // MANUAL CONTROLS
+  rowY += conH + 5;
+  newHeader("MANUAL CONTROLS", xFirst, rowY);
+  rowY += 15;
   moveBenderMinus = newButton("Bender -", xFirst, rowY, conH*2, conH).setGroup(groupManController);
   moveBenderPlus = newButton("Bender +", xScnd, rowY, conH*2, conH).setGroup(groupManController);
   benderRadius = newSlider("bender steps", xThird, rowY, conH*2, conH, 0, angleRangeBender[1], 5);
@@ -101,7 +97,10 @@ void setup()
     .snapToTickMarks(false);
   // cp5.addTextlabel("homeInfo", "test\ntest\ntestast", 200, rowY);
 
-  rowY += conH + 15;
+  // CONNECTION OPTIONS
+  rowY += conH + 25;
+  newHeader("CONNECTION", xFirst, rowY);
+  rowY += 15;
   portsList = cp5.addScrollableList("serial ports")
     .setPosition(xFirst, rowY)
     .setSize(conH*4+5, 60)
@@ -231,6 +230,13 @@ Slider newSlider (String label, int posX, int posY, int w, int h, int min, int m
   return slider;
 }
 
+Textlabel newHeader(String text, int x, int y) {
+  String name = text;
+  text = "" + text + "";
+  Textlabel tl = cp5.addTextlabel(name, text, x, y); 
+  return tl;
+}
+
 void setHomed(boolean status) {
   if (status) {
     homed = true;
@@ -244,10 +250,37 @@ void setHomed(boolean status) {
   }
 }
 
+void fileSelected(File selection) {
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    String filePath = selection.getAbsolutePath();
+    try {
+      Table table = loadTable(filePath, "header");
+      PathGenerator pg = new PathGenerator();
+      ArrayList<PVector3> pointList = pg.shapeFromCSV(table);
+      if (pointList == null) {
+        println("Error: file could not be parsed");
+      } else {
+        Shape shape = new Shape(pg.shapeFromCSV(table));    
+        println(shape.toString());
+        currentSelectedShape = shape;
+        tlCurrentFile.setText("current file: " + selection.getName());
+      }
+    } 
+    catch (java.lang.IllegalArgumentException e) {
+      // println(e);
+      println("Error: not a valid .csv-file");
+    }
+  }
+}
+
 void controlEvent(ControlEvent theEvent) {
   float value = theEvent.getValue();
   Controller con = theEvent.getController();
-  if (con == moveBenderPlus) {
+  if (con == btnLoadFile) {
+    selectInput("Select .csv file:", "fileSelected");
+  } else if (con == moveBenderPlus) {
     sendCommand(Order.BENDER.getValue(), (int) benderRadius.getValue());
     if (homed) setHomed(false);
   } else if (con == moveBenderMinus) {
