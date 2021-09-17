@@ -1,6 +1,7 @@
 import processing.serial.*;
 import controlP5.*;
 import java.util.Arrays;
+import java.util.Collections;
 
 int BAUD_RATE = 115200;
 Serial myPort;
@@ -43,10 +44,28 @@ Button buttonSetHome;
 Button buttonBendDegrees;
 Slider sliderBendDegrees;
 
+void fileSelected(File selection) {
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    String filePath = selection.getAbsolutePath();
+    Table table = loadTable(filePath, "header");
+    for (TableRow row : table.rows()) {
+      float x = row.getInt("x");
+      float y = row.getInt("y");
+      float z = row.getInt("z");
+      PVector p = new PVector(x, y, z);
+      println(p);
+      // IllegalArgumentException
+    }
+  }
+}
+
 void setup() 
 {
   size(325, 300);
-
+  selectInput("Select a file to process:", "fileSelected");
+  
   cp5 = new ControlP5(this);
   int xFirst = 20;
   int xScnd = xFirst + conH*2 + 5;
@@ -247,7 +266,7 @@ void controlEvent(ControlEvent theEvent) {
   } else if (con == buttonSetHome) {
     sendCommand(Order.SETHOMED.getValue());
   } else if (con == buttonBendDegrees) {
-    if(homed) {
+    if (homed) {
       println("beding: " + (int) sliderBendDegrees.getValue() + " degrees");
       sendCommand(Order.BEND.getValue(), (int) sliderBendDegrees.getValue());
     }
@@ -262,7 +281,7 @@ void controlEvent(ControlEvent theEvent) {
 
 void sendCommand(int cmd) {
   if (!connectionIsLocked && connectionStatus == 3) {
-  //if (connectionStatus == 3) {
+    //if (connectionStatus == 3) {
     connectionIsLocked = true;
     //println("sending command: " + cmd);
     myPort.write(byte(cmd));
@@ -272,7 +291,7 @@ void sendCommand(int cmd) {
 
 void sendCommand(int cmd, int value) {
   if (!connectionIsLocked && connectionStatus == 3) {
-  //if (connectionStatus == 3) {
+    //if (connectionStatus == 3) {
     connectionIsLocked = true;
     //println("sending command: " + cmd + " with value: " + value);
     myPort.write(byte(cmd));
