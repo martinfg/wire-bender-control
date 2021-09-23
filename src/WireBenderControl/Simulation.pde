@@ -102,7 +102,7 @@ public class Simulation {
   //  }
   //}
 
-  public void show() {
-    simuShape.show(dotColor, pathColor, true);
+  public void show(PGraphics pg) {
+    simuShape.show(pg, dotColor, pathColor, true);
   }
 }

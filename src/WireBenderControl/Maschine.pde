@@ -13,25 +13,25 @@ public class Maschine {
     // print(this.model);
   }
 
-  public void show() {
-    lights();
+  public void show(PGraphics pg) {
+    pg.lights();
 
     // Feeder
-    fill(255, 200, 100, 20);
-    pushMatrix();
-    rotateY(-HALF_PI);
-    translate(-7.5, -7.5, 0);
+    pg.fill(255, 200, 100, 20);
+    pg.pushMatrix();
+    pg.rotateY(-HALF_PI);
+    pg.translate(-7.5, -7.5, 0);
     //box(d, w, h);
-    shape(model, 0, 0);
-    popMatrix();
+    pg.shape(model, 0, 0);
+    pg.popMatrix();
 
     // BendingHead
-    fill(255, 0, 0);
-    noStroke();
-    pushMatrix();
-    translate(headPosition.x, headPosition.y, headPosition.z);
+    pg.fill(255, 0, 0);
+    pg.noStroke();
+    pg.pushMatrix();
+    pg.translate(headPosition.x, headPosition.y, headPosition.z);
     //sphere(headWidth);
-    popMatrix();
+    pg.popMatrix();
   }
 
   public void bend(float angle) {

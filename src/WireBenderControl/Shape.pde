@@ -74,33 +74,33 @@ public class Shape {
     return s;
   }
 
-  public void show(color pathColor, color dotColor, boolean connectLastToOrigin) {
+  public void show(PGraphics pg, color pathColor, color dotColor, boolean connectLastToOrigin) {
     if (points.size() < 1) return;
     PVector3 prevPoint = this.points.get(0);
     for (PVector3 p : this.points) {
       // show points
-      pushMatrix();
-      translate(p.x, p.y, p.z);
-      noStroke();
-      fill(dotColor);
-      sphere(1);
-      popMatrix();
+      pg.pushMatrix();
+      pg.translate(p.x, p.y, p.z);
+      pg.noStroke();
+      pg.fill(dotColor);
+      //sphere(1);
+      pg.popMatrix();
 
       // show lines
-      strokeWeight(3);
-      stroke(pathColor);
+      pg.strokeWeight(3);
+      pg.stroke(pathColor);
       if (this.points.get(0) != p) {
-        line(prevPoint.x, prevPoint.y, prevPoint.z, 
+        pg.line(prevPoint.x, prevPoint.y, prevPoint.z, 
           p.x, p.y, p.z);
         prevPoint = p;
       }
     }
     // last point in List is connected to origin
     if (connectLastToOrigin) {
-      strokeWeight(3);
-      stroke(pathColor);
+      pg.strokeWeight(3);
+      pg.stroke(pathColor);
       PVector3 lastInList = points.get(points.size()-1);
-      line(lastInList.x, lastInList.y, lastInList.z, 0.0, 0.0, 0.0);
+      pg.line(lastInList.x, lastInList.y, lastInList.z, 0.0, 0.0, 0.0);
     }
   }
 }

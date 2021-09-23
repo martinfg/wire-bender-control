@@ -1,7 +1,9 @@
+import g4p_controls.*;
 import processing.serial.*;
 import controlP5.*;
 import java.util.Arrays;
 import java.util.Collections;
+import peasy.*;
 
 int BAUD_RATE = 115200;
 Serial myPort;
@@ -23,10 +25,14 @@ boolean benderIsReady = false;
 boolean homed = false;
 int[] angleRangeBender = {-90, 90};
 int[] angleRangeZAxis = {-90, 90};
+
 Shape currentSelectedShape;
+String currentSelectedShapeName;
+CAM currentSelectedShapeCam;
+Processor processor;
 
 ControlP5 cp5;
-int conH = 35;
+int conH = 45;
 Group groupManController;
 Button moveBenderPlus;
 Button moveBenderMinus;
@@ -49,16 +55,40 @@ Slider sliderBendDegrees;
 Button btnLoadFile;
 Textlabel tlCurrentFile;
 Button btnSendToBender;
+Button btnSimulate;
+
+AnimationView animationView;
+
+ArrayList<PShape> assets;
+
+void settings() {
+  size(800, 490, P3D);
+}
 
 void setup() 
-{
-  size(325, 420);
+{  
+  // setup view frustrum
+  float fov = PI/3.0;
+  float cameraZ = (height/2.0) / tan(fov/2.0);
+  perspective(fov, float(width)/float(height), 
+              cameraZ/10.0, cameraZ*10.0);
 
+  // laod assets
+  println(dataPath(""));
+  PShape nozzleObj = loadShape("nozzle.obj"); // WHY YOU DONT LOAD ???
+  assets = new ArrayList<PShape>();
+  assets.add(nozzleObj);
+
+  surface.setTitle("WireBenderControlV0.1");
+
+  // animation view
+  animationView = new AnimationView(this, width/2, 0, width/2, height, color(255, 120, 120), color(120, 255, 120), 1.0, assets);
 
   cp5 = new ControlP5(this);
+  cp5.setAutoDraw(false);
   int xFirst = 20;
-  int xScnd = xFirst + conH*2 + 5;
-  int xThird = xScnd + conH*2 + 5;
+  int xScnd = xFirst + conH*2 + conH / 5;
+  int xThird = xScnd + conH*2 + conH / 5;
   int rowY = 20;
 
   groupManController = cp5.addGroup("manController");
@@ -67,11 +97,13 @@ void setup()
   newHeader("LOAD FILE", xFirst, rowY);
   rowY += 15;
   btnLoadFile = newButton("load", xFirst, rowY, conH*2, conH/2);
-  tlCurrentFile = cp5.addTextlabel("currentFile", "no file loaded", xScnd, rowY+4);
+  tlCurrentFile = cp5.addTextlabel("currentFile", "no file loaded", xScnd, rowY + conH / 6);
 
-  rowY += 20;
+  rowY += conH / 1.75;
   btnSendToBender = newButton("send to bender", xFirst, rowY, conH*2, conH/2)
     .setColorBackground(color(145, 0, 0));
+  btnSimulate = newButton("simulate", xScnd, rowY, conH*2, conH/2)
+    .setColorBackground(color(50, 200, 30));
 
   // MANUAL CONTROLS
   rowY += conH + 5;
@@ -123,18 +155,24 @@ void setup()
   connect = newButton("connect", xThird, rowY, conH*2, conH/2);
   //testConnection = newButton("test", xThird, rowY, conH*2, conH/2);
 
-  rowY += conH - 5;
+  rowY += conH / 1.25;
   int ledRadius = 5;
   statusLed = new StatusLed(xFirst+ledRadius, rowY+ledRadius, ledRadius);
   statusField = cp5.addTextlabel("status", statusText, int(xFirst*1.5), rowY);
 
   // init connection lost counter
   lastMillis = millis();
+
+  processor = new Processor();
 }
 
+
 void draw() {
-  background(102);
+  background(82);
+  animationView.show();
+  cp5.draw();
   statusLed.show();
+  animationView.show();
 
   if (connectionStatus == 3) {
     if (millis() - lastMillis > checkConnectionInterval) {
@@ -144,19 +182,29 @@ void draw() {
     if (millis() - lastSignOfLife > isAliveTimeout) {
       connectionStatus = 5;
       statusLed.updateStatus(connectionStatus);
+      disconnect();
       statusField.setText("status: connection to bender lost!");
     }
   }
 }
 
+void updateAnimationWindow() {
+  if (currentSelectedShapeCam != null) {
+    animationView.updateCam(currentSelectedShapeCam);
+  }
+
+  //if (animationWindow == null) {
+  //  color dotColor = color(255, 0, 0);
+  //  color pathColor = color(0, 255, 0);
+  //  float simuSpeed = 1.0;
+  //  animationWindow = new AnimationWindow(currentSelectedShapeName, currentSelectedShapeCam, dotColor, pathColor, simuSpeed, assets);
+  //}
+}
+
 void sendInstructionsToBender() {
-  Processor processor = new Processor();
-  processor.setShape(currentSelectedShape);
-  processor.preprocessShape();
-  processor.calcCAM();
-  CAM cam = processor.getCam();
+  CAM cam = currentSelectedShapeCam;
   Instruction step;
-  while((step = cam.popStep()) != null) {
+  while ((step = cam.popStep()) != null) {
     if (step instanceof FeedInstruction) {
       float dist = step.getAttribute();
       println("feeding:" + step.getAttribute());      
@@ -165,6 +213,10 @@ void sendInstructionsToBender() {
       float angle = step.getAttribute();
       println("bending:" + step.getAttribute());      
       sendCommand(Order.BEND.getValue(), (int) angle);
+    } else if (step instanceof RotateHeadInstruction) {
+      float angle = step.getAttribute();
+      println("rotating zAxis:" + step.getAttribute());      
+      sendCommand(Order.ZAXIS.getValue(), (int) angle);
     }
   }
 }
@@ -277,7 +329,7 @@ void setHomed(boolean status) {
   }
 }
 
-void fileSelected(File selection) {
+void onFileSelected(File selection) {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
   } else {
@@ -292,6 +344,13 @@ void fileSelected(File selection) {
         Shape shape = new Shape(pg.shapeFromCSV(table));    
         println(shape.toString());
         currentSelectedShape = shape;
+        currentSelectedShapeName = selection.getName();
+
+        processor.setShape(currentSelectedShape);
+        processor.preprocessShape();
+        processor.calcCAM();
+        currentSelectedShapeCam = processor.getCam();
+
         tlCurrentFile.setText("current file: " + selection.getName());
       }
     } 
@@ -302,20 +361,28 @@ void fileSelected(File selection) {
   }
 }
 
+void onBtnSendToBenderPressed() {
+  if (currentSelectedShape != null) {
+    if (homed) {
+      sendInstructionsToBender();
+    } else {
+      println("home first");
+    }
+  } else {
+    println("no shape selected");
+  }
+}
+
 void controlEvent(ControlEvent theEvent) {
   float value = theEvent.getValue();
   Controller con = theEvent.getController();
   if (con == btnLoadFile) {
-    selectInput("Select .csv file:", "fileSelected");
+    selectInput("Select .csv file:", "onFileSelected");
   } else if (con == btnSendToBender) {
+    onBtnSendToBenderPressed();
+  } else if (con == btnSimulate) {
     if (currentSelectedShape != null) {
-      if (homed) {
-        sendInstructionsToBender();
-      } else {
-        println("home first");
-      }
-    } else {
-      println("no shape selected");
+      updateAnimationWindow();
     }
   } else if (con == moveBenderPlus) {
     sendCommand(Order.BENDER.getValue(), (int) benderRadius.getValue());
