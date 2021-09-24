@@ -20,8 +20,9 @@ public class Maschine {
     pg.fill(255, 200, 100, 20);
     pg.pushMatrix();
     pg.rotateY(-HALF_PI);
-    pg.translate(-7.5, -7.5, 0);
+    pg.translate(-3.6, -3.6, 0);
     //box(d, w, h);
+    pg.scale(0.5);
     pg.shape(model, 0, 0);
     pg.popMatrix();
 

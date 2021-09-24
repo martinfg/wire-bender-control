@@ -18,7 +18,7 @@ class AnimationView {
     PeasyCam pcam = peasyView.getPeasyCam();
     pcam.setMinimumDistance(100);
     pcam.setMaximumDistance(400);
-    pcam.setDistance(300);
+    //pcam.setDistance(100);
 
     // this.title = title;
     this.maschine = new Maschine(machineAssets.get(0));

@@ -144,6 +144,7 @@ class GUI {
   void sendInstructionsToBender() {
     CAM cam = currentCam;
     Instruction step;
+    // TODO: SEND SEQUENCE START
     while ((step = cam.popStep()) != null) {
       if (step instanceof FeedInstruction) {
         float dist = step.getAttribute();
@@ -159,6 +160,7 @@ class GUI {
         comm.sendCommand(Order.ZAXIS.getValue(), (int) angle);
       }
     }
+    // TODO: SEND SEQUENCE END
   }
 
   void onBtnSendToBenderPressed() {

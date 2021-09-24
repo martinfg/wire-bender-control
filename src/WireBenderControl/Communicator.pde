@@ -132,7 +132,7 @@ class Communicator {
       //if (connectionStatus == 3) {
       connectionIsLocked = true;
       //println("sending command: " + cmd);
-      myPort.write(byte(cmd));
+      sendSingleByte(cmd);
       delay(100);
     }
   }
@@ -142,11 +142,27 @@ class Communicator {
     if (connectionStatus == 3) {
       connectionIsLocked = true;
       //println("sending command: " + cmd + " with value: " + value);
-      myPort.write(byte(cmd));
-      myPort.write(byte(value));
+      sendSingleByte(cmd);
+      sendByteArray(value);
       delay(100);
     }
   }
+
+  void sendSingleByte(int value) {
+    if (value > -128 && value < 128) {
+      myPort.write(byte(value));
+    } else {
+      // TODO: Throw exception here
+      println("value error while sending byte");
+    }
+  }
+
+  void sendByteArray(int value) {
+    byte[] buffer = new byte[2];
+    buffer[0] = (byte)((value >> 8) & 0xff);
+    buffer[1] = (byte)((value >> 0) & 0xff);
+    myPort.write(buffer);
+}
 
   void serialEventTrigger(Serial p) {
     serialIn = p.readChar(); 
