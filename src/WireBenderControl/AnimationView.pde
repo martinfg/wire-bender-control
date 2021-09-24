@@ -19,7 +19,7 @@ class AnimationView {
     pcam.setMinimumDistance(100);
     pcam.setMaximumDistance(400);
     pcam.setDistance(300);
-  
+
     // this.title = title;
     this.maschine = new Maschine(machineAssets.get(0));
     this.dotColor = dotColor;
@@ -45,7 +45,7 @@ class AnimationView {
       pg.textSize(10);
       pg.textAlign(CENTER, CENTER);
       pg.text("no shape selected", peasyView.width()/2, peasyView.height()/2);
-      peasyCam.endHUD();      
+      peasyCam.endHUD();
     }
     pg.endDraw();
   }
@@ -67,6 +67,9 @@ class AnimationView {
     pg.stroke(0, 0, 255, axisAlpha);
     pg.line(0, 0, 0, 0, 0, axisLen);
   }
+
+
+
 
   //void mousePressed() {
   //  println("mousePressed in secondary window");
