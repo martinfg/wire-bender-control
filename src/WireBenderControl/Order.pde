@@ -7,17 +7,26 @@ public enum Order {
     ERR(3),
     ISALIVE(4),
     STOP(5),
+    
     FEEDER(10),
     BENDER(11),
     ZAXIS(12),
     PIN(13),
-    TEST(14),
+    
     SETHOMED(20),
     ISHOMED(21),
     DELHOMED(22),
     ERR_NOTHOMED(23),
     BEND(25),
-    CMD_EXECUTED(29);
+    CMD_EXECUTED(29),
+    
+    OVERWRITE_SETTINGS(40),
+    SET_FEEDING_CONSTANT(41),
+    SET_Z_ANGLE_CONSTANT(42),   
+    SET_OFFSET_FOR_NEG_BEND(43),
+    SET_BEND_ANGLE_CONSTANT(44),   
+    SET_NEG_BEND_ANGLE_CONSTANT(45),
+    SUCC_SETTINGS(49);
 
     private int value;
     private static Map map = new HashMap<Integer, String>();

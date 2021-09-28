@@ -14,20 +14,21 @@ class Communicator {
   int lastMillis;
 
   String selectedPort;
-  String defaultPort;
   String statusText = "status: not connected";
   String[] ports;
 
-  boolean connectionIsLocked = false;
+  boolean benderIsBusy = false;
 
   char serialIn;
 
-  public Communicator(PApplet parent, int baudRate, String defaultPort) {
+  CAM benderInstructions;
+
+  public Communicator(PApplet parent, int baudRate) {
     this.parent = parent;
     this.baudRate = baudRate;
     this.ports = Serial.list();
     this.lastMillis = millis();
-    //connectToPort(defaultPort);
+    this.benderInstructions = null;
   }
 
   String[] getAvailablePorts() {
@@ -39,6 +40,32 @@ class Communicator {
   }
 
   void update() {
+    if (benderInstructions != null) {
+      Instruction step;
+      // TODO: SEND SEQUENCE START
+      if (!benderIsBusy) {
+        if ((step = benderInstructions.popStep()) != null) {
+          if (step instanceof FeedInstruction) {
+            float dist = step.getAttribute();
+            println("feeding:" + step.getAttribute());      
+            comm.sendCommand(Order.FEEDER.getValue(), (int) dist);
+          } else if (step instanceof BendWireInstruction) {
+            float angle = step.getAttribute();
+            println("bending:" + step.getAttribute());      
+            comm.sendCommand(Order.BEND.getValue(), (int) angle);
+          } else if (step instanceof RotateHeadInstruction) {
+            float angle = step.getAttribute();
+            println("rotating zAxis:" + step.getAttribute());      
+            comm.sendCommand(Order.ZAXIS.getValue(), (int) angle);
+          }
+        } else {
+          // TODO: SEND SEQUENCE END
+          benderInstructions = null;
+          println("bending sequence done");
+        }
+      }
+    }
+
     //  if (connectionStatus == 3) {
     //    if (millis() - lastMillis > checkConnectionInterval) {
     //      comm.sendCommand(Order.ISALIVE.getValue());
@@ -46,11 +73,15 @@ class Communicator {
     //    }
     //    if (millis() - lastSignOfLife > isAliveTimeout) {
     //      connectionStatus = 5;
-    //      statusLed.updateStatus(connectionStatus);
+    //      statusLed.upda atus(connectionStatus);
     //      disconnect();
     //      statusField.setText("status: connection to bender lost!");
     //    }
     //  }
+  }
+
+  void sendInstructionsToBender(CAM cam) {
+    benderInstructions = cam;
   }
 
   void connectButtonPressed(String selectedPort) {
@@ -59,6 +90,14 @@ class Communicator {
     } else {
       disconnect();
     }
+  }
+
+  void overwriteSetting() {
+    sendCommand(Order.SET_FEEDING_CONSTANT.getValue(), FEEDING_CONSTANT);
+    sendCommand(Order.SET_Z_ANGLE_CONSTANT.getValue(), Z_ANGLE_CONSTANT);
+    sendCommand(Order.SET_OFFSET_FOR_NEG_BEND.getValue(), OFFSET_FOR_NEG_BEND);
+    sendCommand(Order.SET_BEND_ANGLE_CONSTANT.getValue(), BEND_ANGLE_CONSTANT);
+    sendCommand(Order.SET_NEG_BEND_ANGLE_CONSTANT.getValue(), NEG_BEND_ANGLE_CONSTANT);
   }
 
   void connectToPort(String portName) {
@@ -79,6 +118,7 @@ class Communicator {
           println("connection established");
           gui.updateStatus(connectionStatus);
           lastSignOfLife = millis();
+          overwriteSetting();
           break;
         }
       }
@@ -127,21 +167,19 @@ class Communicator {
     }
   }
 
+  // TODO: RENAME TO sendOrder
   void sendCommand(int cmd) {
-    if (!connectionIsLocked && connectionStatus == 3) {
-      //if (connectionStatus == 3) {
-      connectionIsLocked = true;
-      //println("sending command: " + cmd);
+    if (connectionStatus == 3) {
+      println("sending command: " + cmd);
       sendSingleByte(cmd);
       delay(100);
     }
   }
 
   void sendCommand(int cmd, int value) {
-    //if (!connectionIsLocked && connectionStatus == 3) {
     if (connectionStatus == 3) {
-      connectionIsLocked = true;
-      //println("sending command: " + cmd + " with value: " + value);
+      benderIsBusy = true;
+      println("sending command: " + cmd + " with value: " + value);
       sendSingleByte(cmd);
       sendByteArray(value);
       delay(100);
@@ -159,17 +197,19 @@ class Communicator {
 
   void sendByteArray(int value) {
     byte[] buffer = new byte[2];
-    buffer[0] = (byte)((value >> 8) & 0xff);
-    buffer[1] = (byte)((value >> 0) & 0xff);
+    buffer[1] = (byte)((value >> 8) & 0xff);
+    buffer[0] = (byte)((value >> 0) & 0xff);
+    // println(buffer);
     myPort.write(buffer);
-}
+  }
 
   void serialEventTrigger(Serial p) {
     serialIn = p.readChar(); 
-    //println("received data: " + byte(serialIn));
+    println("received data: " + byte(serialIn));
     if (serialIn == Order.RECEIVED.getValue()) {
       // println("confirmation received");
-      connectionIsLocked = false;
+    } else if (serialIn == Order.CMD_EXECUTED.getValue()) {
+      benderIsBusy = false;
     } else if (serialIn == Order.HELLO.getValue()) {
       connectionStatus = 3;
     } else if (serialIn == Order.ISALIVE.getValue()) {
