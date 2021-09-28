@@ -50,7 +50,7 @@ class GUI {
   Shape currentShape;
   CAM currentCam;
   String currentShapeName;
-  Processor processor;
+  Preprocessor preprocessor;
 
   public GUI(PApplet parent, ControlP5 cp5, Communicator comm, int buttonHeight) {
     this.parent = parent;
@@ -58,7 +58,7 @@ class GUI {
     this.buttonHeight = buttonHeight;
     this.cp5 = cp5;
     initControls(); //<>//
-    processor = new Processor(); //<>//
+    preprocessor = new Preprocessor(); //<>//
   }
 
   void show() {
@@ -142,10 +142,10 @@ class GUI {
           currentShape = shape;
           currentShapeName = selection.getName();
 
-          processor.setShape(currentShape);
-          processor.preprocessShape();
-          processor.calcCAM();
-          currentCam = processor.getCam();
+          preprocessor.setShape(currentShape);
+          preprocessor.preprocessShape();
+          preprocessor.calcCAM();
+          currentCam = preprocessor.getCam();
           animationView.updateCam(currentCam);
 
           tlCurrentFile.setText("current file: " + selection.getName());
