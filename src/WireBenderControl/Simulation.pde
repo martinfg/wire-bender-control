@@ -26,10 +26,10 @@ public class Simulation {
     simuShape.addPoint(origin.copy()); // init first point
     currentInstruction = cam.getStep(currentCamStep);
     currentCamStep ++;
-    println("\n->->->->->->->->->->->");
-    println("Starting simulation");
-    println("<-<-<-<-<-<-<-<-<-<-<-");
     if (debug) {
+      println("\n->->->->->->->->->->->");
+      println("Starting simulation");
+      println("<-<-<-<-<-<-<-<-<-<-<-");
       println(currentInstruction.toString());
     }
   }
@@ -51,7 +51,9 @@ public class Simulation {
     } else {
       currentInstruction = cam.getStep(currentCamStep);
       if (currentInstruction == null) {
-        println("Simulation complete");
+        if (debug) {
+          println("Simulation complete");
+        }
         return;
       } else {
         if (debug) {
@@ -71,7 +73,9 @@ public class Simulation {
     currentInstruction.transform(simuShape);
     currentInstruction = cam.getStep(currentCamStep);
     if (currentInstruction == null) {
-      println("Simulation complete");
+        if (debug) {
+          println("Simulation complete");
+        }
       return;
     } else {
       if (debug) {

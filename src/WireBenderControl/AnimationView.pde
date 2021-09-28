@@ -35,7 +35,7 @@ class AnimationView {
     //pg.ambientLight(100, 100, 100);
     //pg.directionalLight(220, 220, 0, 0.8f, 1, -1.2f);
     peasyCam.feed();
-    pg.background(120);
+    pg.background(180);
     if (showAxis) showAxis(pg);
     maschine.show(pg);
     if (simu != null) simu.show(pg);
@@ -44,14 +44,27 @@ class AnimationView {
       pg.fill(255);
       pg.textSize(10);
       pg.textAlign(CENTER, CENTER);
-      pg.text("no shape selected", peasyView.width()/2, peasyView.height()/2);
+      pg.text("no shape selected", peasyView.width()/2, peasyView.height()/2);      
       peasyCam.endHUD();
     }
+    peasyCam.beginHUD();
+    pg.pushMatrix();
+    pg.fill(200, 255, 200, 255);
+    pg.stroke(255);
+    pg.strokeWeight(1);
+    pg.lights();
+    pg.translate(50, 50, 0);
+    pg.rotateX(peasyCam.getRotations()[0]);
+    pg.rotateY(peasyCam.getRotations()[1]);
+    pg.rotateZ(peasyCam.getRotations()[2]);
+    pg.box(25);
+    pg.popMatrix();
+    peasyCam.endHUD();
     pg.endDraw();
   }
 
   void updateCam(CAM cam) {
-    this.simu = new Simulation(cam, dotColor, pathColor, simuSpeed, true);
+    this.simu = new Simulation(cam, dotColor, pathColor, simuSpeed, false);
     simu.simulateResult();
   }
 
