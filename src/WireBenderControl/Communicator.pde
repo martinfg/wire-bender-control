@@ -124,8 +124,6 @@ class Communicator {
       }
     } 
     catch(RuntimeException e) {
-      println("Port not found");
-      println(e);
       try {
         myPort.stop();
       } 
@@ -135,10 +133,10 @@ class Communicator {
         myPort = null;
         connectionStatus = 6;
         gui.updateStatus(connectionStatus);
+        new UiBooster().showInfoDialog("Unknown error while connecting to port:" + "\n" + e);
       }
     }
     catch(Exception e) {
-      println("connection Timed out");
       try {
         myPort.stop();
       } 
@@ -148,6 +146,7 @@ class Communicator {
         myPort = null;
         connectionStatus = 4;
         gui.updateStatus(connectionStatus);
+        new UiBooster().showInfoDialog("Unknown error while connecting to port:" + "\n" + e);
       }
     }
   }
@@ -170,7 +169,7 @@ class Communicator {
   // TODO: RENAME TO sendOrder
   void sendCommand(int cmd) {
     if (connectionStatus == 3) {
-      println("sending command: " + cmd);
+      debugSerial("sending command: " + cmd);
       sendSingleByte(cmd);
       delay(100);
     }
@@ -179,7 +178,7 @@ class Communicator {
   void sendCommand(int cmd, int value) {
     if (connectionStatus == 3) {
       benderIsBusy = true;
-      println("sending command: " + cmd + " with value: " + value);
+      debugSerial("sending command: " + cmd + " with value: " + value);
       sendSingleByte(cmd);
       sendByteArray(value);
       delay(100);
@@ -205,7 +204,7 @@ class Communicator {
 
   void serialEventTrigger(Serial p) {
     serialIn = p.readChar(); 
-    println("received data: " + byte(serialIn));
+    debugSerial("received data: " + byte(serialIn));
     if (serialIn == Order.RECEIVED.getValue()) {
       // println("confirmation received");
     } else if (serialIn == Order.CMD_EXECUTED.getValue()) {

@@ -47,16 +47,17 @@ class AnimationView {
       pg.text("no shape selected", peasyView.width()/2, peasyView.height()/2);      
       peasyCam.endHUD();
     }
+    
     peasyCam.beginHUD();
     pg.pushMatrix();
-    pg.fill(200, 255, 200, 255);
-    pg.stroke(255);
-    pg.strokeWeight(1);
     pg.lights();
     pg.translate(50, 50, 0);
     pg.rotateX(peasyCam.getRotations()[0]);
     pg.rotateY(peasyCam.getRotations()[1]);
     pg.rotateZ(peasyCam.getRotations()[2]);
+    pg.fill(120);
+    pg.stroke(255);
+    pg.strokeWeight(1);
     pg.box(25);
     pg.popMatrix();
     peasyCam.endHUD();

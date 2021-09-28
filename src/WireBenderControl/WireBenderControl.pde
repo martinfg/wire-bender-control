@@ -24,6 +24,7 @@ public static int NEG_BEND_ANGLE_CONSTANT;
 public static int BEND_ANGLE_CONSTANT;
 
 public static boolean DEBUG = false;
+public static boolean DEBUG_SERIAL = false;
 
 ArrayList<PShape> assets;
 JSONObject config;
@@ -49,9 +50,11 @@ public final void parseConfig() {
 }
 
 public static void debug(String msg) {
-  if (DEBUG) {
-    println(msg);
-  }
+  if (DEBUG) println(msg);
+}
+
+public static void debugSerial(String msg) {
+  if (DEBUG_SERIAL) println(msg);  
 }
 
 void settings() {
@@ -75,7 +78,7 @@ void setup()
     cameraZ/10.0, cameraZ*10.0);
 
   // set window title
-  surface.setTitle("WireBenderControlV0.1");
+  surface.setTitle("WireBenderControlV0.2");
 
   comm = new Communicator(this, 115200);
   cp5 = new ControlP5(this);

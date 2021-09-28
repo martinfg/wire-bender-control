@@ -214,7 +214,7 @@ class GUI {
       btnConnect.setLabel("connect");
       break;
     case 6:
-      tlStatusField.setText("status: port not found");
+      tlStatusField.setText("status: connection not possible");
       statusLed.updateStatus(status);
       btnConnect.setLabel("connect");
       break;

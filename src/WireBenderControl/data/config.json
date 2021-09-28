@@ -1,0 +1,8 @@
+{
+    "DEFAULT_PORT"              : "/dev/ttyUSB0",
+    "FEEDING_CONSTANT"          : 52,
+    "Z_ANGLE_CONSTANT"          : 16,
+    "OFFSET_FOR_NEG_BEND"       : 38,
+    "BEND_ANGLE_CONSTANT"       : 15,
+    "NEG_BEND_ANGLE_CONSTANT"   : 9
+}
