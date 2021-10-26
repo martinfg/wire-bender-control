@@ -8,10 +8,7 @@ class Communicator {
   int startOfConnectionAttempt; // needed to track timeout when connecting
   int delayAfterPortConnected = 2000;
   int connectionEstablishTimeout = 1500;
-  int isAliveTimeout = 15000;
   int lastSignOfLife;
-  int checkConnectionInterval = 1000;
-  int lastMillis;
 
   String selectedPort;
   String statusText = "status: not connected";
@@ -27,7 +24,6 @@ class Communicator {
     this.parent = parent;
     this.baudRate = baudRate;
     this.ports = Serial.list();
-    this.lastMillis = millis();
     this.benderInstructions = null;
   }
 
@@ -65,19 +61,6 @@ class Communicator {
         }
       }
     }
-
-    //  if (connectionStatus == 3) {
-    //    if (millis() - lastMillis > checkConnectionInterval) {
-    //      comm.sendCommand(Order.ISALIVE.getValue());
-    //      lastMillis = millis();
-    //    }
-    //    if (millis() - lastSignOfLife > isAliveTimeout) {
-    //      connectionStatus = 5;
-    //      statusLed.upda atus(connectionStatus);
-    //      disconnect();
-    //      statusField.setText("status: connection to bender lost!");
-    //    }
-    //  }
   }
 
   void sendInstructionsToBender(CAM cam) {

@@ -71,16 +71,13 @@ void setup()
   assets = new ArrayList<PShape>();
   assets.add(nozzleObj);
 
-  // setup view frustrum
-  float fov = PI/3.0;
-  float cameraZ = (height/2.0) / tan(fov/2.0);
-  perspective(fov, float(width)/float(height), 
-    cameraZ/10.0, cameraZ*10.0);
-
   // set window title
-  surface.setTitle("WireBenderControlV0.2");
+  surface.setTitle("WireBenderControl");
 
+  // init serial communicator
   comm = new Communicator(this, 115200);
+  
+  // init gui
   cp5 = new ControlP5(this);
   cp5.setAutoDraw(false);
   gui = new GUI(this, cp5, comm, 45);

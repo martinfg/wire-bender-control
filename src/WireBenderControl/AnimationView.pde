@@ -18,9 +18,6 @@ class AnimationView {
     PeasyCam pcam = peasyView.getPeasyCam();
     pcam.setMinimumDistance(100);
     pcam.setMaximumDistance(400);
-    //pcam.setDistance(100);
-
-    // this.title = title;
     this.maschine = new Maschine(machineAssets.get(0));
     this.dotColor = dotColor;
     this.pathColor = pathColor;
@@ -32,8 +29,6 @@ class AnimationView {
     PeasyCam peasyCam = peasyView.getPeasyCam();
     pg.beginDraw();
     pg.resetMatrix();
-    //pg.ambientLight(100, 100, 100);
-    //pg.directionalLight(220, 220, 0, 0.8f, 1, -1.2f);
     peasyCam.feed();
     pg.background(180);
     if (showAxis) showAxis(pg);
@@ -81,11 +76,4 @@ class AnimationView {
     pg.stroke(0, 0, 255, axisAlpha);
     pg.line(0, 0, 0, 0, 0, axisLen);
   }
-
-
-
-
-  //void mousePressed() {
-  //  println("mousePressed in secondary window");
-  //}
 }

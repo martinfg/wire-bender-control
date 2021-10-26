@@ -121,7 +121,7 @@ class GUI {
       homedState = false;
       println("lost home position");
       btnSetHome.setColorBackground(color(255, 100, 0));
-      comm.sendCommand(Order.DELHOMED.getValue()); // ATTENTION: THIS COMMAND WILL CURRENTLY NOT GET THROUGH BECAUSE OF LOCKED CONNECTION, SO BENDER WONT KNOW WE LOST HOME POSITION.
+      comm.sendCommand(Order.DELHOMED.getValue()); 
     }
   }
 

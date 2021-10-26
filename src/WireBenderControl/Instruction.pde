@@ -55,7 +55,6 @@ public class RotateHeadInstruction extends RotationInstruction {
   }
   public void transformStepwise(Shape shape, float step) {
     super.transform(shape);
-    //shape.rotX(radians(step));
     shape.rotX(step);
   }
 }
@@ -74,25 +73,6 @@ public class BendWireInstruction extends RotationInstruction {
   }
   public void transformStepwise(Shape shape, float step) {
     super.transform(shape);
-    // shape.rotZ(radians(step));
     shape.rotZ(step);
   }
 }
-
-//public class RotateYInstruction extends RotationInstruction {
-//  public RotateYInstruction(float angle) {
-//    this.angle = angle;
-//  }
-//  public String toString() {
-//    super.toString();
-//    return ("ROTATE Y:  " + degrees(this.angle)  + "°");
-//  }
-//  public void transform(Shape shape) {
-//    super.transform(shape);
-//    shape.rotY(angle);
-//  }
-//  public void transformStepwise(Shape shape, float step) {
-//    super.transform(shape);
-//    shape.rotY(radians(step));
-//  }
-//}

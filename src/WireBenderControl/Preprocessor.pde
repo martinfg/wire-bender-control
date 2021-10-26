@@ -16,14 +16,12 @@ public class Preprocessor {
 
   public Shape preprocessShape() {
     // reverse Point list
-    //shape.reverseOrder();  
+    shape.reverseOrder();  
     debug(shape.toString());
 
     // normazile points by 0-centering
     shape.zeroCenter(shape.getPoint(0)); 
 
-    // rotate Shape, so that first two points a connected by a line aligned with the x-axis
-    // after zeroCentering we can assume that the first point of the shape is equal to the origin
     return shape.copy();
   }
 
@@ -37,35 +35,24 @@ public class Preprocessor {
       float benderRotationAngle = 0.0;
       PVector3 currentPoint = new PVector3(0.0, 0.0, 0.0);
       PVector3 nextPoint = this.shape.getPoint(i+1);
-      //nextPoint.roundElements(1000);
 
-      // Always take the current (p0) and the next point (p1) and align the vector definded by those point
-      // with the x-Axis. Since we apply the transformation calculated in this step to all points after
-      // afterwards, we can assume, that p1 is always the origin (0,0,0).
+      // Always take the current (p0) and the next point (p1) and align the vector defined by those points
+      // with the x-Axis. Since we apply the transformation calculated in this step to all points 
+      // afterwards we can assume, that p1 is always the origin (0,0,0).
       // Therefore first rotate the vector into the XY-Plane. The resulting angle corresponds
       // to the rotatation of the bender head. Then rotate the vector onto the XZ-Plane around the z-Axis.
-      // To angle of this rotation corresponds to the actual bend.
-      // signs have to be swapped since the method returns the angle between the plane and the vector.
-      // in order to align we have to rotate in the opposite direction
+      // The angle of this rotation corresponds to the actual bend.
+      // Signs have to be swapped since the method returns the angle between the plane and the vector and
+      // in order to align we have to rotate in the opposite direction.
 
       debug("=============== i=" + i + " ==============");
-      //debug(shape);
       float[] aligmentAngles = getAlignmentAngles(nextPoint);     
       benderRotationAngle = -aligmentAngles[0];
-      //benderRotationAngle = radians(round(degrees(benderRotationAngle)));
 
-      //bendAngle = -aligmentAngles[1];
-      //bendAngle = radians(round(degrees(bendAngle)));
-     
-      // calc angle between points vector and x Axis
-      // and the direction of the bend
-
-      //PVector3 point = nextPoint.copy();
-      //point.normalize();
       PVector3 p_ = nextPoint.copy();
       p_.rotX(benderRotationAngle);
       PVector3 xAxis = new PVector3(1.0, 0.0, 0.0);
-      //bendAngle = angleBetweenTwoVectors(nextPoint, xAxis);
+
       bendAngle = angleBetweenTwoVectors(p_, xAxis);
       debug("angle between vectors " + bendAngle);
       float bendDir = directionOfBend(p_, xAxis);
@@ -75,7 +62,7 @@ public class Preprocessor {
       distance = this.distanceBetweenPoints(currentPoint, nextPoint);
 
       // skip bend and head rotation for the first set of points (2 points are always on a line)
-      // skip head rototation for second set of points (3 points are always in one plane)
+      // skip head rototation for second set of points (3 points are always on one plane)
 
       // write Instructions, order of actions matters here: 
       // 1. First the x-rotator needs to be brought into position
@@ -93,31 +80,12 @@ public class Preprocessor {
       debug("headRotation: " + degrees(benderRotationAngle) + " / bend: " + degrees(bendAngle) + " / distance: " + distance + "\n");
 
       // finally transform all points in order to get the next point into position
-
       for (int j = 0; j < shape.getLength(); j++) {
         PVector3 p = shape.getPoint(j);
         p.rotX(benderRotationAngle);
         p.rotZ(bendAngle);        
         p.trans(new PVector3(-distance, 0.0, 0.0));
       }
-
-      //// ======== DO IT STEPWISE FOR DEBUGGIN AND VISUALIZATION PURPOSES =============
-      //calcSteps.add(shape.copy());
-      //for (int j = 0; j < shape.getLength(); j++) {
-      //  PVector3 p = shape.getPoint(j);
-      //  p.rotX(benderRotationAngle);
-      //}
-      //calcSteps.add(shape.copy());
-      //for (int j = 0; j < shape.getLength(); j++) {
-      //  PVector3 p = shape.getPoint(j);
-      //  p.rotZ(bendAngle);
-      //}
-      //calcSteps.add(shape.copy());
-      //for (int j = 0; j < shape.getLength(); j++) {
-      //  PVector3 p = shape.getPoint(j);
-      //  p.trans(new PVector3(-distance, 0.0, 0.0));
-      //}
-      //// ======== DO IT STEPWISE FOR DEBUGGIN AND VISUALIZATION PURPOSES =============
     }
     this.cam.listSteps();
   }
@@ -133,7 +101,7 @@ public class Preprocessor {
     float[] angles = new float[2];
     PVector3 xAxis = new PVector3(1, 0, 0);
     PVector3 yAxis = new PVector3(0, 1, 0);
-    PVector3 zAxis = new PVector3(0, 0, 1);
+    //PVector3 zAxis = new PVector3(0, 0, 1);
 
     // rotation into XY-plane
     debug("rotation into XY: ");
@@ -208,26 +176,4 @@ public class Preprocessor {
     debug("direction of bend: " + Math.signum(angleDir.dot(zAxis)));
     return Math.signum(angleDir.dot(zAxis));
   }
-
-  //private float angleBetweenPlanes(PVector3 p1, PVector3 p2, PVector3 p3, PVector3 p4) {
-  //  PVector3 firstPlaneNormal = this.planeNormalByPoints(p1, p2, p3);
-  //  PVector3 secndPlaneNormal = this.planeNormalByPoints(p2, p3, p4);
-  //  debug("first plane normal / second plane normal: " + firstPlaneNormal + " " + secndPlaneNormal);
-  //  float angleBetweenPlanes = PVector3.angleBetween(firstPlaneNormal, secndPlaneNormal);
-  //  //debug("the angle between the planes is: " + degrees(angleBetweenPlanes) + "°");
-  //  return angleBetweenPlanes;
-  //}
-
-  //private PVector3 planeNormalByPoints(PVector3 p1, PVector3 p2, PVector3 p3) {
-  //  // get two different vectors defining the plane
-  //  PVector3 v1 = p2.sub(p1);
-  //  PVector3 v2 = p3.sub(p1);
-  //  // calc cross product to obtain normal vector of plane
-  //  PVector3 normal = (PVector3) v1.cross(v2);
-  //  debug("the two vectors defining the plane and their cross product: " + v1 + " " + v2 + " " + normal);
-  //  // normalize the vector
-  //  normal.normalize();
-  //  // return result (normalized)
-  //  return normal;
-  //}
 }

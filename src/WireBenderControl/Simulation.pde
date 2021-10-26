@@ -34,39 +34,40 @@ public class Simulation {
     }
   }
 
-  public void nextStep() {
-    if (currentInstruction == null) return;
-    //println("ATTRIBUTE :" + currentInstruction.getAttribute());
-    if (currentSimuStep < currentInstruction.getAttribute()) {     
-      // avoid overflow if target % simuSpeed is not 0
-      if (currentSimuStep + simuSpeed > currentInstruction.getAttribute()) {
-        float remainder = currentInstruction.getAttribute() - currentSimuStep;
-        currentInstruction.transformStepwise(simuShape, remainder);
-        currentSimuStep = currentInstruction.getAttribute();
-      } else {
-        currentInstruction.transformStepwise(simuShape, simuSpeed);
-        currentSimuStep += simuSpeed;
-      }
-      //println("current step: " + currentSimuStep + "/" + currentInstruction.getAttribute());
-    } else {
-      currentInstruction = cam.getStep(currentCamStep);
-      if (currentInstruction == null) {
-        if (debug) {
-          println("Simulation complete");
-        }
-        return;
-      } else {
-        if (debug) {
-          println(currentInstruction.toString());
-        }
-      }
-      // add a new point at origin every step
-      simuShape.addPoint(origin.copy());
-      currentSimuStep = 0.0;
-      currentCamStep ++;
-      nextStep();
-    }
-  }
+  // TODO: Properly implement stepwise bending simulation
+  //public void nextStep() {
+  //  if (currentInstruction == null) return;
+  //  //println("ATTRIBUTE :" + currentInstruction.getAttribute());
+  //  if (currentSimuStep < currentInstruction.getAttribute()) {     
+  //    // avoid overflow if target % simuSpeed is not 0
+  //    if (currentSimuStep + simuSpeed > currentInstruction.getAttribute()) {
+  //      float remainder = currentInstruction.getAttribute() - currentSimuStep;
+  //      currentInstruction.transformStepwise(simuShape, remainder);
+  //      currentSimuStep = currentInstruction.getAttribute();
+  //    } else {
+  //      currentInstruction.transformStepwise(simuShape, simuSpeed);
+  //      currentSimuStep += simuSpeed;
+  //    }
+  //    //println("current step: " + currentSimuStep + "/" + currentInstruction.getAttribute());
+  //  } else {
+  //    currentInstruction = cam.getStep(currentCamStep);
+  //    if (currentInstruction == null) {
+  //      if (debug) {
+  //        println("Simulation complete");
+  //      }
+  //      return;
+  //    } else {
+  //      if (debug) {
+  //        println(currentInstruction.toString());
+  //      }
+  //    }
+  //    // add a new point at origin every step
+  //    simuShape.addPoint(origin.copy());
+  //    currentSimuStep = 0.0;
+  //    currentCamStep ++;
+  //    nextStep();
+  //  }
+  //}
 
   public void simulateResult() {
     if (currentInstruction == null) return;
@@ -87,24 +88,6 @@ public class Simulation {
     currentCamStep ++;
     simulateResult();
   }
-
-
-  //public boolean prevStep() {
-  //  Instruction prevStep = cam.getStep(currentStep);
-  //  if (prevStep == null) {
-  //    println("Simulation reset");
-  //    return false;
-  //  } else {
-  //    if (debug) {
-  //      println(prevStep.toString());
-  //    }
-  //    prevStep.transform(simuShape);
-  //    // add a new point at origin every step
-  //    simuShape.addPoint(origin.copy());
-  //    currentStep --;
-  //    return true;
-  //  }
-  //}
 
   public void show(PGraphics pg) {
     simuShape.show(pg, dotColor, pathColor, true);
